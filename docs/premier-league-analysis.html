@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="" xml:lang="">
+<head>
+
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <title>Chapter 3 Premier League analysis | Data Science in Julia for Hackers</title>
+  <meta name="description" content="Chapter 3 Premier League analysis | Data Science in Julia for Hackers" />
+  <meta name="generator" content="bookdown 0.21 and GitBook 2.6.7" />
+
+  <meta property="og:title" content="Chapter 3 Premier League analysis | Data Science in Julia for Hackers" />
+  <meta property="og:type" content="book" />
+  
+  
+  
+  
+
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="Chapter 3 Premier League analysis | Data Science in Julia for Hackers" />
+  
+  
+  
+
+<meta name="author" content="LambdaE" />
+
+
+<meta name="date" content="2021-04-14" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  
+  
+<link rel="prev" href="basketball-how-likely-is-it-to-score.html"/>
+
+<script src="libs/header-attrs-2.7/header-attrs.js"></script>
+<script src="libs/jquery-2.2.3/jquery.min.js"></script>
+<link href="libs/gitbook-2.6.7/css/style.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-table.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-bookdown.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-highlight.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-search.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-fontsettings.css" rel="stylesheet" />
+<link href="libs/gitbook-2.6.7/css/plugin-clipboard.css" rel="stylesheet" />
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+</style>
+
+<link rel="stylesheet" href="style.css" type="text/css" />
+</head>
+
+<body>
+
+
+
+  <div class="book without-animation with-summary font-size-2 font-family-1" data-basepath=".">
+
+    <div class="book-summary">
+      <nav role="navigation">
+
+<ul class="summary">
+<li><a href="./">Data Science in Julia for Hackers</a></li>
+
+<li class="divider"></li>
+<li class="chapter" data-level="1" data-path="data-science-in-julia-for-hackers.html"><a href="data-science-in-julia-for-hackers.html"><i class="fa fa-check"></i><b>1</b> Data Science in Julia for Hackers</a>
+<ul>
+<li class="chapter" data-level="1.1" data-path="data-science-in-julia-for-hackers.html"><a href="data-science-in-julia-for-hackers.html#prologue"><i class="fa fa-check"></i><b>1.1</b> # Prologue</a></li>
+</ul></li>
+<li class="chapter" data-level="2" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html"><i class="fa fa-check"></i><b>2</b> Basketball: how likely is it to score?</a>
+<ul>
+<li class="chapter" data-level="2.0.1" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#modeling-the-probability-of-scoring"><i class="fa fa-check"></i><b>2.0.1</b> Modeling the probability of scoring</a></li>
+<li class="chapter" data-level="2.1" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#prior-predictive-checks-part-i"><i class="fa fa-check"></i><b>2.1</b> Prior Predictive Checks: Part I</a>
+<ul>
+<li class="chapter" data-level="2.1.1" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#defining-our-model-and-computing-posteriors"><i class="fa fa-check"></i><b>2.1.1</b> Defining our model and computing posteriors</a></li>
+</ul></li>
+<li class="chapter" data-level="2.2" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#new-model-and-prior-predictive-checks-part-ii"><i class="fa fa-check"></i><b>2.2</b> New model and prior predictive checks: Part II</a>
+<ul>
+<li class="chapter" data-level="2.2.1" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#defining-the-new-model-and-computing-posteriors"><i class="fa fa-check"></i><b>2.2.1</b> Defining the new model and computing posteriors</a></li>
+<li class="chapter" data-level="2.2.2" data-path="basketball-how-likely-is-it-to-score.html"><a href="basketball-how-likely-is-it-to-score.html#summary"><i class="fa fa-check"></i><b>2.2.2</b> Summary</a></li>
+</ul></li>
+</ul></li>
+<li class="chapter" data-level="3" data-path="premier-league-analysis.html"><a href="premier-league-analysis.html"><i class="fa fa-check"></i><b>3</b> Premier League analysis</a>
+<ul>
+<li class="chapter" data-level="3.1" data-path="premier-league-analysis.html"><a href="premier-league-analysis.html#creating-our-conjectures"><i class="fa fa-check"></i><b>3.1</b> Creating our conjectures</a>
+<ul>
+<li class="chapter" data-level="3.1.1" data-path="premier-league-analysis.html"><a href="premier-league-analysis.html#bayesian-hierarchical-models"><i class="fa fa-check"></i><b>3.1.1</b> Bayesian hierarchical models</a></li>
+</ul></li>
+<li class="chapter" data-level="3.2" data-path="premier-league-analysis.html"><a href="premier-league-analysis.html#summary-1"><i class="fa fa-check"></i><b>3.2</b> Summary</a>
+<ul>
+<li class="chapter" data-level="3.2.1" data-path="premier-league-analysis.html"><a href="premier-league-analysis.html#bibliography"><i class="fa fa-check"></i><b>3.2.1</b> Bibliography</a></li>
+</ul></li>
+</ul></li>
+<li class="divider"></li>
+<li><a href="https://github.com/rstudio/bookdown" target="blank">Published with bookdown</a></li>
+</ul>
+
+      </nav>
+    </div>
+
+    <div class="book-body">
+      <div class="body-inner">
+        <div class="book-header" role="navigation">
+          <h1>
+            <i class="fa fa-circle-o-notch fa-spin"></i><a href="./">Data Science in Julia for Hackers</a>
+          </h1>
+        </div>
+
+        <div class="page-wrapper" tabindex="-1" role="main">
+          <div class="page-inner">
+
+            <section class="normal" id="section-">
+<div id="premier-league-analysis" class="section level1" number="3">
+<h1><span class="header-section-number">Chapter 3</span> Premier League analysis</h1>
+<div class="sourceCode" id="cb39"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb39-1"><a href="premier-league-analysis.html#cb39-1" aria-hidden="true" tabindex="-1"></a><span class="kw">begin</span></span>
+<span id="cb39-2"><a href="premier-league-analysis.html#cb39-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> JSON</span>
+<span id="cb39-3"><a href="premier-league-analysis.html#cb39-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">using</span> DataFrames</span>
+<span id="cb39-4"><a href="premier-league-analysis.html#cb39-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<div class="sourceCode" id="cb40"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb40-1"><a href="premier-league-analysis.html#cb40-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> Turing</span></code></pre></div>
+<div class="sourceCode" id="cb41"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb41-1"><a href="premier-league-analysis.html#cb41-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> LinearAlgebra</span></code></pre></div>
+<div id="creating-our-conjectures" class="section level2" number="3.1">
+<h2><span class="header-section-number">3.1</span> Creating our conjectures</h2>
+<p>If there is one thing we can all agree on, it is that the reality in which we live is complex. The explanation for the things we usually see, and have naturalized in our daily lives, is usually quite complex and requires abstraction from what “is simply seen”.</p>
+<p>In order to give an explanation and gain a deeper understanding of the things we see, we tend to generate models that seek to explain them in a simple and generalized way. In this way we can reduce the noise of our observations to general rules that “govern” them.</p>
+<p>For example, it is obvious to everyone that if we push a glass it will move in the same direction as we did. We also know that if we keep pushing it and it goes beyond the limits of the table, it will fall to the floor. But one thing is to have the intuition of what’s going to happen, and another is to have an understanding of the laws that govern that movement. In this case, they are the Newton´s Law´s of motion:</p>
+<p>$ ^{} = m*^{}$</p>
+<p>In this way, and with only one formula, it is possible to gain an understanding that is generalizable to many aspects of reality.</p>
+<div id="observable-variables-vs-latent-variables" class="section level4" number="3.1.0.1">
+<h4><span class="header-section-number">3.1.0.1</span> Observable variables vs Latent variables</h4>
+<p>Now, it is worth noting that in this case all the variables that make up our model are observable. This means that they can be measured directly.</p>
+<p>In the case of a glass, we could weigh it with a scale. Then, by pushing it, we could measure the acceleration it acquired and from these two measurements we could obtain the force we applied to it. So, every parameter of the model is fully defined.</p>
+<p>However, as we try to advance in our understanding of reality, we arrive at more and more complex models and many times we are not so lucky to be able to define them with simple observable variables.</p>
+<p>For example, this is very common in the economic sciences, where models are created with variables such as “quality of life”. Economists will try to measure this latent variable with other variables that can be observed (such as GDP per capita, schooling rate, number of hospitals for a certain number of inhabitants, etc), but that do not have an obvious and direct relationship as if they had newton’s equations.</p>
+<p>This type of latent variables are used in different models to gain greater abstraction and to be able to obtain information that is not found at first sight in the data. For example, in the case of economics, from concrete measures of a country’s economy it is possible to generalize knowledge and be able to infer an abstract variable such as quality of life.</p>
+</div>
+<div id="bayesian-hierarchical-models" class="section level3" number="3.1.1">
+<h3><span class="header-section-number">3.1.1</span> Bayesian hierarchical models</h3>
+<p>The Bayesian framework allows us to build statistical models that can generalize the information obtained from the data and make inferences from latent variables.</p>
+<p>A nice way to think about this kind of models is that they allow us to build our “story” about which are the variables that generate the data we are observing. Basically, they allow us to increase the “depth” of our model by indicating that the parameters of our prior distributions also follow other probability distributions.</p>
+<p>This sure is sounding very strange. Don’t worry, let’s move on to an example to clarify it.</p>
+<div id="football-analysis" class="section level4" number="3.1.1.1">
+<h4><span class="header-section-number">3.1.1.1</span> Football analysis</h4>
+<p>Let’s imagine for a moment that we are brilliant statisticians. We find ourselves looking for new interesting challenges to solve and we come across a sports bookmaker. They tell us that they want to expand into football betting and that they would like us to be able to build a model that allows them to analyze the strengths and weaknesses of English Premier League teams. They are interested because they want to be able to predict possible outcomes and thus be able to price the bets.</p>
+<p>The problem is that, as they have never worked in this sector before, they only have the results of the league matches. So what can we do?</p>
+<p>We have the data stored in a specific format called JSON, so the first thing to do is to parse and visualize it</p>
+<div class="sourceCode" id="cb42"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb42-1"><a href="premier-league-analysis.html#cb42-1" aria-hidden="true" tabindex="-1"></a><span class="kw">begin</span></span>
+<span id="cb42-2"><a href="premier-league-analysis.html#cb42-2" aria-hidden="true" tabindex="-1"></a>england_league <span class="op">=</span> JSON.parsefile(<span class="st">&quot;matches_England.json&quot;</span>)</span>
+<span id="cb42-3"><a href="premier-league-analysis.html#cb42-3" aria-hidden="true" tabindex="-1"></a>matches_df <span class="op">=</span> DataFrame(home <span class="op">=</span> []<span class="op">,</span> away <span class="op">=</span> []<span class="op">,</span> score_home <span class="op">=</span> []<span class="op">,</span> score_away <span class="op">=</span> [])</span>
+<span id="cb42-4"><a href="premier-league-analysis.html#cb42-4" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb43"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb43-1"><a href="premier-league-analysis.html#cb43-1" aria-hidden="true" tabindex="-1"></a><span class="kw">begin</span></span>
+<span id="cb43-2"><a href="premier-league-analysis.html#cb43-2" aria-hidden="true" tabindex="-1"></a>    matches <span class="op">=</span> []</span>
+<span id="cb43-3"><a href="premier-league-analysis.html#cb43-3" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> match <span class="kw">in</span> england_league</span>
+<span id="cb43-4"><a href="premier-league-analysis.html#cb43-4" aria-hidden="true" tabindex="-1"></a>        push<span class="op">!</span>(matches<span class="op">,</span> split(match[<span class="st">&quot;label&quot;</span>]<span class="op">,</span> <span class="st">&quot;,&quot;</span>))</span>
+<span id="cb43-5"><a href="premier-league-analysis.html#cb43-5" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb43-6"><a href="premier-league-analysis.html#cb43-6" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<div class="sourceCode" id="cb44"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb44-1"><a href="premier-league-analysis.html#cb44-1" aria-hidden="true" tabindex="-1"></a><span class="kw">begin</span></span>
+<span id="cb44-2"><a href="premier-league-analysis.html#cb44-2" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> match <span class="kw">in</span> matches</span>
+<span id="cb44-3"><a href="premier-league-analysis.html#cb44-3" aria-hidden="true" tabindex="-1"></a>    home<span class="op">,</span> away <span class="op">=</span> split(match[<span class="fl">1</span>]<span class="op">,</span> <span class="st">&quot; - &quot;</span>)</span>
+<span id="cb44-4"><a href="premier-league-analysis.html#cb44-4" aria-hidden="true" tabindex="-1"></a>    score_home<span class="op">,</span> score_away <span class="op">=</span> split(match[<span class="fl">2</span>]<span class="op">,</span> <span class="st">&quot; - &quot;</span>)</span>
+<span id="cb44-5"><a href="premier-league-analysis.html#cb44-5" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb44-6"><a href="premier-league-analysis.html#cb44-6" aria-hidden="true" tabindex="-1"></a>    push<span class="op">!</span>(matches_df<span class="op">,</span>[home<span class="op">,</span> away<span class="op">,</span> parse(<span class="dt">Int</span><span class="op">,</span>score_home)<span class="op">,</span> parse(<span class="dt">Int</span><span class="op">,</span>score_away)])</span>
+<span id="cb44-7"><a href="premier-league-analysis.html#cb44-7" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span>
+<span id="cb44-8"><a href="premier-league-analysis.html#cb44-8" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span> </span></code></pre></div>
+<div class="sourceCode" id="cb45"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb45-1"><a href="premier-league-analysis.html#cb45-1" aria-hidden="true" tabindex="-1"></a>matches_df</span></code></pre></div>
+<pre><code>## 380×4 DataFrame
+##  Row │ home                    away                    score_home  score_away
+##      │ Any                     Any                     Any         Any
+## ─────┼────────────────────────────────────────────────────────────────────────
+##    1 │ Burnley                 AFC Bournemouth         1           2
+##    2 │ Crystal Palace          West Bromwich Albion    2           0
+##    3 │ Huddersfield Town       Arsenal                 0           1
+##    4 │ Liverpool               Brighton &amp; Hove Albion  4           0
+##    5 │ Manchester United       Watford                 1           0
+##    6 │ Newcastle United        Chelsea                 3           0
+##    7 │ Southampton             Manchester City         0           1
+##    8 │ Swansea City            Stoke City              1           2
+##   ⋮  │           ⋮                       ⋮                 ⋮           ⋮
+##  374 │ Chelsea                 Burnley                 2           3
+##  375 │ Crystal Palace          Huddersfield Town       0           3
+##  376 │ Everton                 Stoke City              1           0
+##  377 │ Southampton             Swansea City            0           0
+##  378 │ West Bromwich Albion    AFC Bournemouth         1           0
+##  379 │ Watford                 Liverpool               3           3
+##  380 │ Arsenal                 Leicester City          4           3
+##                                                               365 rows omitted</code></pre>
+<div class="sourceCode" id="cb47"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb47-1"><a href="premier-league-analysis.html#cb47-1" aria-hidden="true" tabindex="-1"></a>teams <span class="op">=</span> unique(collect(matches_df[<span class="op">:,</span><span class="fl">1</span>]))</span></code></pre></div>
+<pre><code>## 20-element Array{Any,1}:
+##  &quot;Burnley&quot;
+##  &quot;Crystal Palace&quot;
+##  &quot;Huddersfield Town&quot;
+##  &quot;Liverpool&quot;
+##  &quot;Manchester United&quot;
+##  &quot;Newcastle United&quot;
+##  &quot;Southampton&quot;
+##  &quot;Swansea City&quot;
+##  &quot;Tottenham Hotspur&quot;
+##  &quot;West Ham United&quot;
+##  &quot;Manchester City&quot;
+##  &quot;Leicester City&quot;
+##  &quot;Chelsea&quot;
+##  &quot;Arsenal&quot;
+##  &quot;Everton&quot;
+##  &quot;AFC Bournemouth&quot;
+##  &quot;Watford&quot;
+##  &quot;West Bromwich Albion&quot;
+##  &quot;Stoke City&quot;
+##  &quot;Brighton &amp; Hove Albion&quot;</code></pre>
+<p>So, we have the data of the 380 matches that were played in the Premier League 2017/2018 and our challenge is to be able to analyze the characteristics of these teams.</p>
+<p>A priori it may seem that we are missing data, that with the data we have we cannot infer “characteristics” specific to each team. At most, it might be possible to see who the teams that scored the most goals, the averages of goals per game or how the positions were after the tournament, but to obtain characteristics of the teams? how could we face this problem?</p>
+</div>
+<div id="creating-our-stories" class="section level4" number="3.1.1.2">
+<h4><span class="header-section-number">3.1.1.2</span> Creating our stories</h4>
+<p>Let’s see what information we have from our data:
+On one hand we have specified the names of each team and which one is local. On the other hand, we have the number of goals scored.</p>
+<p>A possible approach to this data is to realize that the goals scored by each team can be modeled with a poisson distribution.</p>
+<p>Why? You have to remember that this distribution describes “arrivals” - discrete events - in a continuum. For example, it is widely used to describe customer arrivals to a location as time passes or failures in continuous industrial processes (e.g. failure in the production of a pipe).</p>
+<p>In this particular case, we could propose that the goals scored by a team are the discrete events that occur in the time continuum that the game last:</p>
+<p><span class="math inline">\(Score \sim Poisson(θ)\)</span></p>
+<p>Well, we have an improvement. We’ve already told our model how to think about goals scored.</p>
+<p>Now we can use the flexibility of Bayesianism to indicate what the “goal rate” of our Poisson depends on. You can think of it literally as the number of goals a team scores per unit of time. And this is where we have to take advantage of all the information provided by the data set.</p>
+<p>As expected, this rate has to be particular to each match the team plays and take into account the opponent. We can therefore propose that the scoring rate of each team (in each particular match) depends on the “attacking power” of the team on the one hand, and the “defensive power” of the opponent on the other:</p>
+<p><span class="math inline">\(θ_{team1} \sim att_{team1} + def_{team2}\)</span></p>
+<p>In this way we could be capturing, from the results of each game, the attack and defence strengths of each team.</p>
+<p>Another latent variable that we could obtain, given the data, is if there is an effect that increases (or decreases) the goal rate related to whether the team is local or not. This would also help - in case there is indeed an effect - in not the attack and defence parameters be disrupted by having to “contain” that information.</p>
+<p><span class="math inline">\(θ_{home} \sim home + att_{home} + def_{away}\)</span>
+<span class="math inline">\(θ_{away} \sim att_{away} + def_{home}\)</span>"</p>
+<p>This leaves one attack and one defense parameter for each team, and a global league parameter that indicates the effect of being local on the scoring rate.</p>
+</div>
+<div id="letting-the-information-flow" class="section level4" number="3.1.1.3">
+<h4><span class="header-section-number">3.1.1.3</span> Letting the information flow</h4>
+<p>We are already getting much closer to the initial goal we set. As a last step, we must be able to make the information flow between the two independent poissons that we proposed to model the score of each of the two teams that are playing. We need to do that precisely because we have proposed that the poissons are independent, but we need that when making the inference of the parameters the model can access the information from both scores so it can catch the correlation between them. In other words, we have to find a way to interconnect our model.</p>
+<p>And that is exactly what hierarchical Bayesian models allow us to do. How? By letting us choose probability distributions for the parameters that represent the characteristics of both equipment. With the addition that these parameters will share the same prior distributions. Let’s see how:</p>
+<p>The first thing to do, as we already know, is to assign the prior distributions of our attack and defense parameters. A reasonable idea would be to propose that they follow a normal distribution since it is consistent that there are some teams that have a very good defense, so the parameter would take negative values; or there may be others that have a very bad one, taking positive values (since they would “add up” to the goal rate of the opposing team). The normal distribution allows us to contemplate both cases.</p>
+<p>Now, when choosing the parameters we are not going to stop and assign fixed numbers, but we will continue to deepen the model and add another layer of distributions:</p>
+<p><span class="math inline">\(att_{t} \sim Normal(μ_{att}, σ_{att})\)</span>
+<span class="math inline">\(def_{t} \sim Normal(μ_{def}, σ_{def})\)</span></p>
+<p>Where the t sub-index is indicating us that there are a couple of these parameters for each team.</p>
+<p>Then, as a last step to have our model defined, we have to assign the priority distributions that follow the parameters of each normal distribution. We have to define our hyper priors.</p>
+<p><span class="math inline">\(μ_{att}, μ_{def} \sim Normal(0, 0.1)\)</span>
+<span class="math inline">\(σ_{att}, σ_{def} \sim Exponential(1)\)</span></p>
+<p>We must not forget the parameter that represents the advantage of being local</p>
+<p><span class="math inline">\(home \sim Normal(0,1)\)</span></p>
+<p>Now that our model is fully define, let’s add one last restriction to the characteristics of the teams to make it easier to compare them: subtract the average of all the attack and defence powers from each one. In this way we will have the features centred on zero, with negative values for the teams that have less attacking power than the average and positive values for those that have more. As we already said, the opposite analysis applies to the defence, negative values are the ones that will indicate that a team has a strong defence as they will be “subtracting” from the scoring rate of the opponent. This is equivalent to introducing the restriction:</p>
+<p><span class="math inline">\(\sum att_{t} = 0\)</span>
+<span class="math inline">\(\sum def_{t} = 0\)</span></p>
+<p>Let’s translate all this into Turing code:</p>
+<div class="sourceCode" id="cb49"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb49-1"><a href="premier-league-analysis.html#cb49-1" aria-hidden="true" tabindex="-1"></a><span class="kw">begin</span></span>
+<span id="cb49-2"><a href="premier-league-analysis.html#cb49-2" aria-hidden="true" tabindex="-1"></a>    <span class="pp">@model</span> <span class="kw">function</span> football_matches(home_teams<span class="op">,</span> away_teams<span class="op">,</span> score_home<span class="op">,</span> score_away<span class="op">,</span> teams)</span>
+<span id="cb49-3"><a href="premier-league-analysis.html#cb49-3" aria-hidden="true" tabindex="-1"></a>    <span class="co">#hyper priors</span></span>
+<span id="cb49-4"><a href="premier-league-analysis.html#cb49-4" aria-hidden="true" tabindex="-1"></a>    σatt <span class="op">~</span> Exponential(<span class="fl">1</span>)</span>
+<span id="cb49-5"><a href="premier-league-analysis.html#cb49-5" aria-hidden="true" tabindex="-1"></a>    σdeff <span class="op">~</span> Exponential(<span class="fl">1</span>)</span>
+<span id="cb49-6"><a href="premier-league-analysis.html#cb49-6" aria-hidden="true" tabindex="-1"></a>    μatt <span class="op">~</span> Normal(<span class="fl">0</span><span class="op">,</span><span class="fl">0.1</span>)</span>
+<span id="cb49-7"><a href="premier-league-analysis.html#cb49-7" aria-hidden="true" tabindex="-1"></a>    μdef <span class="op">~</span> Normal(<span class="fl">0</span><span class="op">,</span><span class="fl">0.1</span>)</span>
+<span id="cb49-8"><a href="premier-league-analysis.html#cb49-8" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-9"><a href="premier-league-analysis.html#cb49-9" aria-hidden="true" tabindex="-1"></a>    home <span class="op">~</span> Normal(<span class="fl">0</span><span class="op">,</span><span class="fl">1</span>)</span>
+<span id="cb49-10"><a href="premier-league-analysis.html#cb49-10" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb49-11"><a href="premier-league-analysis.html#cb49-11" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Team-specific effects  </span></span>
+<span id="cb49-12"><a href="premier-league-analysis.html#cb49-12" aria-hidden="true" tabindex="-1"></a>    att <span class="op">~</span> filldist(Normal(μatt<span class="op">,</span> σatt)<span class="op">,</span> length(teams))</span>
+<span id="cb49-13"><a href="premier-league-analysis.html#cb49-13" aria-hidden="true" tabindex="-1"></a>    def <span class="op">~</span> filldist(Normal(μatt<span class="op">,</span> σdeff)<span class="op">,</span> length(teams))</span>
+<span id="cb49-14"><a href="premier-league-analysis.html#cb49-14" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-15"><a href="premier-league-analysis.html#cb49-15" aria-hidden="true" tabindex="-1"></a>    dict <span class="op">=</span> <span class="dt">Dict</span>{<span class="dt">String</span><span class="op">,</span> <span class="dt">Int64</span>}()</span>
+<span id="cb49-16"><a href="premier-league-analysis.html#cb49-16" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> (i<span class="op">,</span> team) <span class="kw">in</span> enumerate(teams)</span>
+<span id="cb49-17"><a href="premier-league-analysis.html#cb49-17" aria-hidden="true" tabindex="-1"></a>        dict[team] <span class="op">=</span> i</span>
+<span id="cb49-18"><a href="premier-league-analysis.html#cb49-18" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb49-19"><a href="premier-league-analysis.html#cb49-19" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb49-20"><a href="premier-league-analysis.html#cb49-20" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Zero-sum constrains</span></span>
+<span id="cb49-21"><a href="premier-league-analysis.html#cb49-21" aria-hidden="true" tabindex="-1"></a>    offset <span class="op">=</span> mean(att) <span class="op">+</span> mean(def)</span>
+<span id="cb49-22"><a href="premier-league-analysis.html#cb49-22" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-23"><a href="premier-league-analysis.html#cb49-23" aria-hidden="true" tabindex="-1"></a>    log_θ_home <span class="op">=</span> <span class="dt">Vector</span>{<span class="dt">Real</span>}(<span class="cn">undef</span><span class="op">,</span> length(home_teams))</span>
+<span id="cb49-24"><a href="premier-league-analysis.html#cb49-24" aria-hidden="true" tabindex="-1"></a>    log_θ_away <span class="op">=</span> <span class="dt">Vector</span>{<span class="dt">Real</span>}(<span class="cn">undef</span><span class="op">,</span> length(home_teams))</span>
+<span id="cb49-25"><a href="premier-league-analysis.html#cb49-25" aria-hidden="true" tabindex="-1"></a>        </span>
+<span id="cb49-26"><a href="premier-league-analysis.html#cb49-26" aria-hidden="true" tabindex="-1"></a>    <span class="co">#Modeling score-rate and scores (as many as there were games in the league) </span></span>
+<span id="cb49-27"><a href="premier-league-analysis.html#cb49-27" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> i <span class="kw">in</span> <span class="fl">1</span><span class="op">:</span>length(home_teams)</span>
+<span id="cb49-28"><a href="premier-league-analysis.html#cb49-28" aria-hidden="true" tabindex="-1"></a>        <span class="co">#score-rate</span></span>
+<span id="cb49-29"><a href="premier-league-analysis.html#cb49-29" aria-hidden="true" tabindex="-1"></a>        log_θ_home[i] <span class="op">=</span> home <span class="op">+</span> att[dict[home_teams[i]]] <span class="op">+</span> def[dict[away_teams[i]]] <span class="op">-</span> offset</span>
+<span id="cb49-30"><a href="premier-league-analysis.html#cb49-30" aria-hidden="true" tabindex="-1"></a>        log_θ_away[i] <span class="op">=</span> att[dict[away_teams[i]]] <span class="op">+</span> def[dict[home_teams[i]]] <span class="op">-</span> offset</span>
+<span id="cb49-31"><a href="premier-league-analysis.html#cb49-31" aria-hidden="true" tabindex="-1"></a>        <span class="co">#scores</span></span>
+<span id="cb49-32"><a href="premier-league-analysis.html#cb49-32" aria-hidden="true" tabindex="-1"></a>        score_home[i] <span class="op">~</span> LogPoisson(log_θ_home[i])</span>
+<span id="cb49-33"><a href="premier-league-analysis.html#cb49-33" aria-hidden="true" tabindex="-1"></a>        score_away[i] <span class="op">~</span> LogPoisson(log_θ_away[i])</span>
+<span id="cb49-34"><a href="premier-league-analysis.html#cb49-34" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb49-35"><a href="premier-league-analysis.html#cb49-35" aria-hidden="true" tabindex="-1"></a>    </span>
+<span id="cb49-36"><a href="premier-league-analysis.html#cb49-36" aria-hidden="true" tabindex="-1"></a>    <span class="kw">end</span></span>
+<span id="cb49-37"><a href="premier-league-analysis.html#cb49-37" aria-hidden="true" tabindex="-1"></a><span class="kw">end</span></span></code></pre></div>
+<pre><code>## football_matches (generic function with 1 method)</code></pre>
+<p>As you can see, the turing code is very clear and direct. In the first block we define our hyperpriors for the distributions of the characteristics of the equipment.</p>
+<p>In the second one, we define the priors distributions that will encapsulate the information about the attack and defense powers of the teams. With the <em>filldist</em> function we are telling Turing that we need as many of these parameters as there are teams in the league <em>length(teams)</em></p>
+<p>Then, we calculate the average of the defense and attack parameters that we are going to use to centralize those variables, and we use the LogPoisson distribution to allow the theta to take some negative value in the inference process and give more sensitivity to the parameters that make it up.</p>
+<p>As we said before, we will model the thetas for each game played in the league, that’s why the <em>for</em> of the last block goes from 1 to <em>length(home_teams)</em>, which is the list that contains who was the local team of each game played.</p>
+<p>So let´s run it and see if all of this effort was worth it:</p>
+<div class="sourceCode" id="cb51"><pre class="sourceCode julia"><code class="sourceCode julia"><span id="cb51-1"><a href="premier-league-analysis.html#cb51-1" aria-hidden="true" tabindex="-1"></a>model <span class="op">=</span> football_matches(matches_df[<span class="op">:,</span><span class="fl">1</span>]<span class="op">,</span> matches_df[<span class="op">:,</span><span class="fl">2</span>]<span class="op">,</span> matches_df[<span class="op">:,</span><span class="fl">3</span>]<span class="op">,</span> matches_df[<span class="op">:,</span><span class="fl">4</span>]<span class="op">,</span> teams)</span></code></pre></div>
+<pre><code>## DynamicPPL.Model{var&quot;#139#140&quot;,(:home_teams, :away_teams, :score_home, :score_away, :teams),(),(),NTuple{5,Array{Any,1}},Tuple{}}(:football_matches, var&quot;#139#140&quot;(), (home_teams = Any[&quot;Burnley&quot;, &quot;Crystal Palace&quot;, &quot;Huddersfield Town&quot;, &quot;Liverpool&quot;, &quot;Manchester United&quot;, &quot;Newcastle United&quot;, &quot;Southampton&quot;, &quot;Swansea City&quot;, &quot;Tottenham Hotspur&quot;, &quot;West Ham United&quot;  …  &quot;Manchester United&quot;, &quot;Newcastle United&quot;, &quot;Brighton &amp; Hove Albion&quot;, &quot;Chelsea&quot;, &quot;Crystal Palace&quot;, &quot;Everton&quot;, &quot;Southampton&quot;, &quot;West Bromwich Albion&quot;, &quot;Watford&quot;, &quot;Arsenal&quot;], away_teams = Any[&quot;AFC Bournemouth&quot;, &quot;West Bromwich Albion&quot;, &quot;Arsenal&quot;, &quot;Brighton &amp; Hove Albion&quot;, &quot;Watford&quot;, &quot;Chelsea&quot;, &quot;Manchester City&quot;, &quot;Stoke City&quot;, &quot;Leicester City&quot;, &quot;Everton&quot;  …  &quot;West Ham United&quot;, &quot;Tottenham Hotspur&quot;, &quot;Manchester City&quot;, &quot;Burnley&quot;, &quot;Huddersfield Town&quot;, &quot;Stoke City&quot;, &quot;Swansea City&quot;, &quot;AFC Bournemouth&quot;, &quot;Liverpool&quot;, &quot;Leicester City&quot;], score_home = Any[1, 2, 0, 4, 1, 3, 0, 1, 5, 3  …  4, 0, 0, 2, 0, 1, 0, 1, 3, 4], score_away = Any[2, 0, 1, 0, 0, 0, 1, 2, 4, 1  …  0, 2, 2, 3, 3, 0, 0, 0, 3, 3], teams = Any[&quot;Burnley&quot;, &quot;Crystal Palace&quot;, &quot;Huddersfield Town&quot;, &quot;Liverpool&quot;, &quot;Manchester United&quot;, &quot;Newcastle United&quot;, &quot;Southampton&quot;, &quot;Swansea City&quot;, &quot;Tottenham Hotspur&quot;, &quot;West Ham United&quot;, &quot;Manchester City&quot;, &quot;Leicester City&quot;, &quot;Chelsea&quot;, &quot;Arsenal&quot;, &quot;Everton&quot;, &quot;AFC Bournemouth&quot;, &quot;Watford&quot;, &quot;West Bromwich Albion&quot;, &quot;Stoke City&quot;, &quot;Brighton &amp; Hove Albion&quot;]), NamedTuple())</code></pre>
+<p>Still, the model assigns some probability to those results. Here is the information, then, you have to decide what to do with it.</p>
+<p>As data scientist that we are, our labor is to came up with possible solutions to a problem, try it, have fun, and learn from it in order to be able to came up with better solutions. It is a very good practice to constructively criticize the models that we develop. So, can you think of improvements for our model? Well, I help you with some ideas:</p>
+<p>The logic of a cup tournament is different than the league. In the first one, if you lose, you have to return to your house and the other advances to the next round. And in the league, you have to be consistent to the hole year. Maybe a draw is good for you, as your goal is to make the most difference in points. So try to extrapolate the model to other tournament maybe questionable.</p>
+<p>Other thing is that we suppose that the two matches were independent, when the second one is conditioned to the first! As the Liverpool won the first match, the Manchester had to played to the second game with the aim of making at least 3 goals while Liverpool were only focus in the defence.</p>
+<p>Anyway, we just learned that modeling is not a easy task. But the way to get better is proposing them, testing them and learning from them. In other words, the only way to learn is doing them (as any other skill in life). So, relax, model and have fun :)</p>
+</div>
+</div>
+</div>
+<div id="summary-1" class="section level2" number="3.2">
+<h2><span class="header-section-number">3.2</span> Summary</h2>
+<p>In this chapter we have learned about bayesian hierarchical models and how to use simulations to count different possible outcomes. First, we talked about latent variables and how important they are for gaining more abstraction in our models. After explaning the pro’s of the hierarchical models, we proceed on building a model to get a deeper understanding of the Premier League. After inferring its parameters, we have used visualizations to understand the influence of attack and defense power in the league. Finally, we ran a simulation in order to calculate the probabilities of each possible outcome of a match between Liverpool and Manchester City.</p>
+<div id="bibliography" class="section level3" number="3.2.1">
+<h3><span class="header-section-number">3.2.1</span> Bibliography</h3>
+<ul>
+<li><a href="https://discovery.ucl.ac.uk/id/eprint/16040/1/16040.pdf">Paper of Gianluca Baio and Marta A. Blangiardo</a></li>
+<li><a href="http://danielweitzenfeld.github.io/passtheroc/blog/2014/10/28/bayes-premier-league/">Post of Daniel Weitzenfeld</a></li>
+</ul>
+<p>### Give us feedback</p>
+<p>This book is currently in a beta version. We are looking forward to getting feedback and criticism:
+* Submit a GitHub issue <strong><a href="https://github.com/unbalancedparentheses/data_science_in_julia_for_hackers/issues">here</a></strong>.
+* Mail us to <strong><a href="mailto:martina.cantaro@lambdaclass.com" class="email">martina.cantaro@lambdaclass.com</a></strong></p>
+<p>Thank you!</p>
+
+</div>
+</div>
+</div>
+            </section>
+
+          </div>
+        </div>
+      </div>
+<a href="basketball-how-likely-is-it-to-score.html" class="navigation navigation-prev navigation-unique" aria-label="Previous page"><i class="fa fa-angle-left"></i></a>
+
+    </div>
+  </div>
+<script src="libs/gitbook-2.6.7/js/app.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/lunr.js"></script>
+<script src="libs/gitbook-2.6.7/js/clipboard.min.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-search.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-sharing.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-fontsettings.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-bookdown.js"></script>
+<script src="libs/gitbook-2.6.7/js/jquery.highlight.js"></script>
+<script src="libs/gitbook-2.6.7/js/plugin-clipboard.js"></script>
+<script>
+gitbook.require(["gitbook"], function(gitbook) {
+gitbook.start({
+"sharing": {
+"github": false,
+"facebook": true,
+"twitter": true,
+"linkedin": false,
+"weibo": false,
+"instapaper": false,
+"vk": false,
+"all": ["facebook", "twitter", "linkedin", "weibo", "instapaper"]
+},
+"fontsettings": {
+"theme": "white",
+"family": "sans",
+"size": 2
+},
+"edit": {
+"link": "https://github.com/pefontana/ds-with-julia-demo/edit/master/3-futbol.Rmd",
+"text": "Edit"
+},
+"history": {
+"link": null,
+"text": null
+},
+"view": {
+"link": "https://github.com/pefontana/ds-with-julia-demo/blob/master/3-futbol.Rmd",
+"text": null
+},
+"download": null,
+"toc": {
+"collapse": "subsection"
+}
+});
+});
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    var src = "true";
+    if (src === "" || src === "true") src = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-MML-AM_CHTML";
+    if (location.protocol !== "file:")
+      if (/^https?:/.test(src))
+        src = src.replace(/^https?:/, '');
+    script.src = src;
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+</body>
+
+</html>

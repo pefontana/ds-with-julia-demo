@@ -1,0 +1,272 @@
+---
+
+date: "4/14/2021"
+output: html_document
+---
+
+# Premier League analysis
+
+```{julia}
+begin
+	using JSON
+	using DataFrames
+end
+````
+
+```{julia}
+using Turing
+```
+
+```{julia}
+using LinearAlgebra
+````
+
+
+
+
+## Creating our conjectures
+
+If there is one thing we can all agree on, it is that the reality in which we live is complex. The explanation for the things we usually see, and have naturalized in our daily lives, is usually quite complex and requires abstraction from what "is simply seen".
+
+In order to give an explanation and gain a deeper understanding of the things we see, we tend to generate models that seek to explain them in a simple and generalized way. In this way we can reduce the noise of our observations to general rules that "govern" them.
+
+For example, it is obvious to everyone that if we push a glass it will move in the same direction as we did. We also know that if we keep pushing it and it goes beyond the limits of the table, it will fall to the floor. But one thing is to have the intuition of what's going to happen, and another is to have an understanding of the laws that govern that movement. In this case, they are the Newton´s Law´s of motion:
+
+
+
+$ \vec{F}^{\} = m*\vec{a}^{\}$
+
+In this way, and with only one formula, it is possible to gain an understanding that is generalizable to many aspects of reality. 
+
+#### Observable variables vs Latent variables
+
+Now, it is worth noting that in this case all the variables that make up our model are observable. This means that they can be measured directly.
+
+In the case of a glass, we could weigh it with a scale. Then, by pushing it, we could measure the acceleration it acquired and from these two measurements we could obtain the force we applied to it. So, every parameter of the model is fully defined.
+
+However, as we try to advance in our understanding of reality, we arrive at more and more complex models and many times we are not so lucky to be able to define them with simple observable variables.
+
+For example, this is very common in the economic sciences, where models are created with variables such as "quality of life". Economists will try to measure this latent variable with other variables that can be observed (such as GDP per capita, schooling rate, number of hospitals for a certain number of inhabitants, etc), but that do not have an obvious and direct relationship as if they had newton's equations.
+
+This type of latent variables are used in different models to gain greater abstraction and to be able to obtain information that is not found at first sight in the data. For example, in the case of economics, from concrete measures of a country's economy it is possible to generalize knowledge and be able to infer an abstract variable such as quality of life.
+
+### Bayesian hierarchical models
+
+The Bayesian framework allows us to build statistical models that can generalize the information obtained from the data and make inferences from latent variables. 
+
+A nice way to think about this kind of models is that they allow us to build our "story" about which are the variables that generate the data we are observing. Basically, they allow us to increase the "depth" of our model by indicating that the parameters of our prior distributions also follow other probability distributions.
+
+This sure is sounding very strange. Don't worry, let's move on to an example to clarify it.
+
+#### Football analysis
+
+Let's imagine for a moment that we are brilliant statisticians. We find ourselves looking for new interesting challenges to solve and we come across a sports bookmaker. They tell us that they want to expand into football betting and that they would like us to be able to build a model that allows them to analyze the strengths and weaknesses of English Premier League teams. They are interested because they want to be able to predict possible outcomes and thus be able to price the bets. 
+
+The problem is that, as they have never worked in this sector before, they only have the results of the league matches. So what can we do? 
+
+We have the data stored in a specific format called JSON, so the first thing to do is to parse and visualize it
+
+```{julia}
+begin
+england_league = JSON.parsefile("matches_England.json")
+matches_df = DataFrame(home = [], away = [], score_home = [], score_away = [])
+end;
+```
+
+```{julia}
+begin
+	matches = []
+	for match in england_league
+		push!(matches, split(match["label"], ","))
+    end
+end
+```
+
+```{julia}
+begin
+for match in matches
+	home, away = split(match[1], " - ")
+	score_home, score_away = split(match[2], " - ")
+	
+	push!(matches_df,[home, away, parse(Int,score_home), parse(Int,score_away)])
+end
+end	
+````
+
+```{julia}
+matches_df
+```
+
+```{julia}
+teams = unique(collect(matches_df[:,1]))
+```
+So, we have the data of the 380 matches that were played in the Premier League 2017/2018 and our challenge is to be able to analyze the characteristics of these teams. 
+
+A priori it may seem that we are missing data, that with the data we have we cannot infer "characteristics" specific to each team. At most, it might be possible to see who the teams that scored the most goals, the averages of goals per game or how the positions were after the tournament, but to obtain characteristics of the teams? how could we face this problem?
+
+#### Creating our stories
+
+Let's see what information we have from our data: 
+On one hand we have specified the names of each team and which one is local. On the other hand, we have the number of goals scored.
+
+A possible approach to this data is to realize that the goals scored by each team can be modeled with a poisson distribution. 
+
+Why? You have to remember that this distribution describes "arrivals" - discrete events - in a continuum. For example, it is widely used to describe customer arrivals to a location as time passes or failures in continuous industrial processes (e.g. failure in the production of a pipe). 
+
+In this particular case, we could propose that the goals scored by a team are the discrete events that occur in the time continuum that the game last:
+
+
+
+$Score \sim Poisson(θ)$
+
+Well, we have an improvement. We've already told our model how to think about goals scored. 
+
+Now we can use the flexibility of Bayesianism to indicate what the "goal rate" of our Poisson depends on.  You can think of it literally as the number of goals a team scores per unit of time. And this is where we have to take advantage of all the information provided by the data set.
+
+As expected, this rate has to be particular to each match the team plays and take into account the opponent. We can therefore propose that the scoring rate of each team (in each particular match) depends on the "attacking power" of the team on the one hand, and the "defensive power" of the opponent on the other:
+
+
+
+$θ_{team1} \sim att_{team1} + def_{team2}$ 
+
+In this way we could be capturing, from the results of each game, the attack and defence strengths of each team. 
+
+Another latent variable that we could obtain, given the data, is if there is an effect that increases (or decreases) the goal rate related to whether the team is local or not. This would also help - in case there is indeed an effect - in not the attack and defence parameters be disrupted by having to "contain" that information.
+
+$θ_{home} \sim home + att_{home} + def_{away}$
+$θ_{away} \sim att_{away} + def_{home}$"
+
+This leaves one attack and one defense parameter for each team, and a global league parameter that indicates the effect of being local on the scoring rate.
+
+#### Letting the information flow 
+
+We are already getting much closer to the initial goal we set. As a last step, we must be able to make the information flow between the two independent poissons that we proposed to model the score of each of the two teams that are playing. We need to do that precisely because we have proposed that the poissons are independent, but we need that when making the inference of the parameters the model can access the information from both scores so it can catch the correlation between them. In other words, we have to find a way to interconnect our model.
+
+And that is exactly what hierarchical Bayesian models allow us to do. How? By letting us choose probability distributions for the parameters that represent the characteristics of both equipment. With the addition that these parameters will share the same prior distributions. Let's see how:
+
+The first thing to do, as we already know, is to assign the prior distributions of our attack and defense parameters. A reasonable idea would be to propose that they follow a normal distribution since it is consistent that there are some teams that have a very good defense, so the parameter would take negative values; or there may be others that have a very bad one, taking positive values (since they would "add up" to the goal rate of the opposing team). The normal distribution allows us to contemplate both cases.
+
+Now, when choosing the parameters we are not going to stop and assign fixed numbers, but we will continue to deepen the model and add another layer of distributions:
+
+
+
+$att_{t} \sim Normal(μ_{att}, σ_{att})$
+$def_{t} \sim Normal(μ_{def}, σ_{def})$
+
+Where the t sub-index is indicating us that there are a couple of these parameters for each team.
+
+Then, as a last step to have our model defined, we have to assign the priority distributions that follow the parameters of each normal distribution. We have to define our hyper priors.
+
+
+
+$μ_{att}, μ_{def} \sim Normal(0, 0.1)$
+$σ_{att}, σ_{def} \sim Exponential(1)$
+
+We must not forget the parameter that represents the advantage of being local
+
+$home \sim Normal(0,1)$
+
+Now that our model is fully define, let's add one last restriction to the characteristics of the teams to make it easier to compare them: subtract the average of all the attack and defence powers from each one. In this way we will have the features centred on zero, with negative values for the teams that have less attacking power than the average and positive values for those that have more. As we already said, the opposite analysis applies to the defence, negative values are the ones that will indicate that a team has a strong defence as they will be "subtracting" from the scoring rate of the opponent. This is equivalent to introducing the restriction:
+
+
+$\sum att_{t} = 0$
+$\sum def_{t} = 0$
+
+Let's translate all this into Turing code:
+
+```{julia}
+begin
+	@model function football_matches(home_teams, away_teams, score_home, score_away, teams)
+	#hyper priors
+	σatt ~ Exponential(1)
+	σdeff ~ Exponential(1)
+	μatt ~ Normal(0,0.1)
+	μdef ~ Normal(0,0.1)
+	
+	home ~ Normal(0,1)
+		
+	#Team-specific effects	
+	att ~ filldist(Normal(μatt, σatt), length(teams))
+	def ~ filldist(Normal(μatt, σdeff), length(teams))
+	
+	dict = Dict{String, Int64}()
+	for (i, team) in enumerate(teams)
+		dict[team] = i
+	end
+		
+	#Zero-sum constrains
+	offset = mean(att) + mean(def)
+	
+	log_θ_home = Vector{Real}(undef, length(home_teams))
+	log_θ_away = Vector{Real}(undef, length(home_teams))
+		
+	#Modeling score-rate and scores (as many as there were games in the league) 
+	for i in 1:length(home_teams)
+		#score-rate
+		log_θ_home[i] = home + att[dict[home_teams[i]]] + def[dict[away_teams[i]]] - offset
+		log_θ_away[i] = att[dict[away_teams[i]]] + def[dict[home_teams[i]]] - offset
+		#scores
+		score_home[i] ~ LogPoisson(log_θ_home[i])
+		score_away[i] ~ LogPoisson(log_θ_away[i])
+	end
+	
+	end
+end
+```
+
+As you can see, the turing code is very clear and direct. In the first block we define our hyperpriors for the distributions of the characteristics of the equipment.
+
+In the second one, we define the priors distributions that will encapsulate the information about the attack and defense powers of the teams. With the *filldist* function we are telling Turing that we need as many of these parameters as there are teams in the league *length(teams)*
+
+Then, we calculate the average of the defense and attack parameters that we are going to use to centralize those variables, and we use the LogPoisson distribution to allow the theta to take some negative value in the inference process and give more sensitivity to the parameters that make it up.
+
+As we said before, we will model the thetas for each game played in the league, that's why the *for* of the last block goes from 1 to *length(home_teams)*, which is the list that contains who was the local team of each game played.
+
+So let´s run it and see if all of this effort was worth it:
+
+
+```{julia}
+model = football_matches(matches_df[:,1], matches_df[:,2], matches_df[:,3], matches_df[:,4], teams)
+```
+
+Still, the model assigns some probability to those results. Here is the information, then, you have to decide what to do with it.
+
+As data scientist that we are, our labor is to came up with possible solutions to a problem, try it, have fun, and learn from it in order to be able to came up with better solutions. It is a very good practice to constructively criticize the models that we develop. So, can you think of improvements for our model? Well, I help you with some ideas: 
+
+The logic of a cup tournament is different than the league. In the first one, if you lose, you have to return to your house and the other advances to the next round. And in the league, you have to be consistent to the hole year. Maybe a draw is good for you, as your goal is to make the most difference in points. So try to extrapolate the model to other tournament maybe questionable. 
+
+Other thing is that we suppose that the two matches were independent, when the second one is conditioned to the first! As the Liverpool won the first match, the Manchester had to played to the second game with the aim of making at least 3 goals while Liverpool were only focus in the defence.
+
+
+Anyway, we just learned that modeling is not a easy task. But the way to get better is proposing them, testing them and learning from them. In other words, the only way to learn is doing them (as any other skill in life). So, relax, model and have fun :)
+
+## Summary
+
+In this chapter we have learned about bayesian hierarchical models and how to use simulations to count different possible outcomes. First, we talked about latent variables and how important they are for gaining more abstraction in our models. After explaning the pro's of the hierarchical models, we proceed on building a model to get a deeper understanding of the Premier League. After inferring its parameters, we have used visualizations to understand the influence of attack and defense power in the league. Finally, we ran a simulation in order to calculate the probabilities of each possible outcome of a match between Liverpool and Manchester City.
+
+
+
+### Bibliography 
+
+- [Paper of Gianluca Baio and Marta A. Blangiardo](https://discovery.ucl.ac.uk/id/eprint/16040/1/16040.pdf)
+- [Post of Daniel Weitzenfeld](http://danielweitzenfeld.github.io/passtheroc/blog/2014/10/28/bayes-premier-league/)
+
+
+
+### Give us feedback
+ 
+ 
+This book is currently in a beta version. We are looking forward to getting feedback and criticism:
+  * Submit a GitHub issue **[here](https://github.com/unbalancedparentheses/data_science_in_julia_for_hackers/issues)**.
+  * Mail us to **martina.cantaro@lambdaclass.com**
+ 
+Thank you!
+ 
+
+
+
+
+
+
+
+ 
