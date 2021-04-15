@@ -1,7 +1,0 @@
---- 
-title: "Data Science in Julia for Hackers"
-author: "LambdaE"
-date: "`r Sys.Date()`"
-site: bookdown::bookdown_site
----
-
