@@ -7,7 +7,9 @@ defining-our-model-and-computing-posteriors
 traceplot
 new-model-and-prior-predictive-checks-part-ii
 defining-the-new-model-and-computing-posteriors
+does-the-period-affect-the-probability-of-scoring
 summary
+give-us-feedback
 premier-league-analysis
 creating-our-conjectures
 observable-variables-vs-latent-variables
@@ -15,5 +17,8 @@ bayesian-hierarchical-models
 football-analysis
 creating-our-stories
 letting-the-information-flow
+analyzing-the-results
+simulate-possible-realities
 summary-1
 bibliography
+give-us-feedback-1
