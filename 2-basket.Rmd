@@ -17,7 +17,7 @@ begin
 	using StatsPlots
 	using Plots
 	
-	season_2007 = CSV.read("./data/seasons/shots_season_2006_2007.csv", DataFrame)
+	season_2007 = CSV.read("./chapter-2/data/seasons/shots_season_2006_2007.csv", DataFrame)
 
 	#shots = vcat(season_2007, season_2008, season_2009);
 	shots = season_2007
@@ -31,7 +31,7 @@ end;
 ```{julia}
 begin
 	using Images
-	img = load("./images/basket_court.png")
+	img = load("./chapter-2/images/basket_court.png")
 	plot(img)
 end
 ```
@@ -245,7 +245,7 @@ n=1000;
 
 The output of the sampling  tell us also some information about sampled values for our parameters, like the mean, the standard deviation and some other computations.
 
-```{julia}
+```{julia , cache=TRUE}
 # Sample using HMC.
 chain = mapreduce(c -> sample(logistic_regression(shots.distance[1:n] ./ maximum(shots.distance[1:n] ), shots.angle[1:n], shots.result[1:n], n), NUTS(), 1500),
     chainscat,
@@ -395,7 +395,7 @@ We define then our model and calculate the posterior as before.
 end
 ```
 
-```{julia}
+```{julia , cache=TRUE}
 # Sample using HMC.
 chain_exp = mapreduce(c -> sample(logistic_regression_exp(shots.distance[1:n] ./ maximum(shots.distance[1:n] ), shots.angle[1:n], shots.result[1:n], n), HMC(0.05, 10), 1500),
     chainscat,
@@ -447,20 +447,114 @@ end;
 ```
 
 ```{julia}
-im3 =  load("./images/img1.png")
+im3 =  load("./chapter-2/images/img1.png")
 plot(im3)
-#begin
-#plotly()
-#plot(dist_grid, rad2deg.(angle_grid), z, color=:blue, zlabel="Probability", legend=false, camera=(10,0))	
-#xlabel!("Normalized distance")
-#ylabel!("Angle [deg]")
 
-#title!("Mean Probability of scoring from posterior sampled values")
-#end
 ```
+
 
 The plot show the behaviour expected, an increasing probability of scoring as we get near the hoop. We also see that there is almost no variation of the probability with the angle.
 
+## Does the Period affect the probability of scoring?
+
+Now we will try to answer this question. We propose then a model, and calculate the posterior for its parameters with data of one of each of the four possible periods. We define the same model for all four periods. Also, we don't take into account now the angle variable, since we have seen before that this variable is of little importance.
+
+We filter then our data by its period and proceed to estimate our posterior distributions.
+
+```{julia}
+shots_period1= filter(x->x.period==1, shots);
+```
+
+```{julia}
+@model logistic_regression_period(distances, result,n) = begin
+  N = length(distances)
+  # Set priors.
+	a ~ Normal(0,1) 
+	b ~ Beta(2,5)
+ 	for i in 1:n
+		p = logistic( a +  b .^ distances[i])
+        result[i] ~ Bernoulli(p)
+			end
+end
+```
+
+```{julia}
+n_ = 500
+```
+
+```{julia , cache=TRUE}
+# Sample using HMC.
+chain_period1 = mapreduce(c -> sample(logistic_regression_period(shots_period1.distance[1:n_] ./ maximum(shots_period1.distance[1:n_] ),shots_period1.result[1:n_], n_), HMC(0.05, 10), 1500),
+    chainscat,
+    1:3
+);
+```
+
+```{julia}
+shots_period2= filter(x->x.period==2, shots);
+````
+
+```{julia , cache=TRUE}
+# Sample using HMC.
+chain_period2 = mapreduce(c -> sample(logistic_regression_period(shots_period2.distance[1:n_] ./ maximum(shots_period2.distance[1:n_] ), shots_period2.result[1:n_], n_), HMC(0.05, 10), 1500),
+    chainscat,
+    1:3
+);
+```
+
+```{julia}
+shots_period3= filter(x->x.period==3, shots);
+````
+
+```{julia , cache=TRUE}
+# Sample using HMC.
+chain_period3 = mapreduce(c -> sample(logistic_regression_period(shots_period3.distance[1:n_] ./ maximum(shots_period3.distance[1:n_] ), shots_period3.result[1:n_], n_), HMC(0.05, 10), 1500),
+    chainscat,
+    1:3
+);
+```
+
+```{julia}
+shots_period4 = filter(x->x.period==4, shots);
+```
+
+
+```{julia , cache=TRUE}
+# Sample using HMC.
+chain_period4 = mapreduce(c -> sample(logistic_regression_period(shots_period4.distance[1:n_] ./ maximum(shots_period4.distance[1:n_]), shots_period4.result[1:n_], n_), HMC(0.05, 10), 1500),
+    chainscat,
+    1:3
+);
+```
+
+```{julia}
+begin
+p_period1 = logistic.(mean(chain_period1[:a]) .+ mean(chain_period1[:b]).^possible_distances )
+p_period1_std = logistic.((mean(chain_period1[:a]).+std(chain_period1[:a])) .+ (mean(chain_period1[:b]).+std(chain_period1[:a])).^possible_distances)
+p_period2 = logistic.(mean(chain_period2[:a]) .+ mean(chain_period2[:b]).^possible_distances )
+p_period2_std = logistic.((mean(chain_period2[:a]).+std(chain_period2[:a])) .+ (mean(chain_period2[:b]).+std(chain_period2[:a])).^possible_distances)
+p_period3 = logistic.(mean(chain_period3[:a]) .+ mean(chain_period3[:b]).^possible_distances)
+p_period3_std = logistic.((mean(chain_period3[:a]).+std(chain_period3[:a])) .+ (mean(chain_period3[:b]).+std(chain_period3[:a])).^possible_distances)
+p_period4 = logistic.(mean(chain_period4[:a]) .+ mean(chain_period4[:b]).^possible_distances )
+p_period4_std = logistic.((mean(chain_period4[:a]).+std(chain_period4[:a])) .+ (mean(chain_period4[:b]).+std(chain_period4[:a])).^possible_distances )
+end;
+```
+
+We plot now for each period the probability of scoring for each period, each mean and one standard deviation from it.
+
+```{julia}
+begin
+	plot(possible_distances, p_period4,ribbon=p_period4_std.-p_period4,  color=:magenta, label="period4", fillalpha=.3, ylim=(0,0.6))
+	plot!(possible_distances, p_period2, color=:green, ribbon=p_period2_std.-p_period2, label="period2", fillalpha=.3)
+	plot!(possible_distances, p_period3, color=:orange, ribbon=p_period3_std.-p_period3, label="period3",fillalpha=.3)
+		plot!(possible_distances, p_period1,ribbon=p_period1_std.-p_period1, color=:blue, label="period1", fillalpha=.3)
+	xlabel!("Normalized distance")
+	ylabel!("Scoring probability")
+	
+end
+```
+
+Finally, we see that for the periods 1 and 4, the first and the last periods, the probabity of scoring is slightly higher than the other two periods, meaning that players are somewhat better scoring in those periods.
 
 
 ### Summary
